@@ -85,9 +85,9 @@ const Table = () => {
   const onChange = (index: number, newValue: number) => {
     setValues(values.map((value, i) => (i === index ? newValue : value)));
   };
-  const total = +values.reduce((p, v) => p + v, 0).toFixed(3)
-  const overTime = +(total - 40).toFixed(3)
-  const standard = overTime > 0 ? 40 : total
+  const total = +values.reduce((p, v) => p + v, 0).toFixed(3);
+  const overTime = +(total - 40).toFixed(3);
+  const standard = overTime > 0 ? 40 : total;
   return (
     <>
       <table>
@@ -119,7 +119,10 @@ const Table = () => {
             {values.map((value, i) => (
               <td key={i}>{value}</td>
             ))}
-            <th>Standard: {standard} {overTime > 0 ? `| Overtime: ${overTime}` : ''}</th>
+            <th>
+              Standard: {standard.toFixed(3)}{" "}
+              {overTime > 0 ? `| Overtime: ${overTime.toFixed(3)}` : ""}
+            </th>
           </tr>
         </tbody>
       </table>
