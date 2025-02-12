@@ -86,7 +86,7 @@ const Table = () => {
     setValues(values.map((value, i) => (i === index ? newValue : value)));
   };
   const total = +values.reduce((p, v) => p + v, 0).toFixed(3)
-  const overTime = total - 40
+  const overTime = +(total - 40).toFixed(3)
   const standard = overTime > 0 ? 40 : total
   return (
     <>
