@@ -13,7 +13,7 @@ const turnHoursAndMinutesIntoHoursFloat = (value: string) => {
   if (hoursString) {
     hours = Number(hoursString);
   }
-  return +(hours + minutes / 60).toFixed(3);
+  return +(hours + minutes / 60).toFixed(4);
 };
 
 const Tr = ({
@@ -76,6 +76,34 @@ const Tr = ({
   );
 };
 
+const buildDays = (
+  values: number[]
+): [number, number, number, Array<[number, number]>] => {
+  const days: Array<[number, number]> = [];
+  let total = 0;
+  let standard = 0;
+  let overtime = 0;
+  for (const value of values) {
+    if (overtime > 0) {
+      days.push([0, value]);
+      overtime = overtime + value;
+      total = total + value;
+      continue;
+    }
+    if (total + value > 40) {
+      overtime = total + value - 40;
+      days.push([value - overtime, overtime]);
+      standard = 40;
+      total = total + value;
+      continue;
+    }
+    days.push([value, 0]);
+    total = total + value;
+    standard = standard + value;
+  }
+  return [total, standard, overtime, days];
+};
+
 const Table = () => {
   const numberOfWeeks = 1;
   const weeks = Array(numberOfWeeks).fill(2);
@@ -85,11 +113,13 @@ const Table = () => {
   const onChange = (index: number, newValue: number) => {
     setValues(values.map((value, i) => (i === index ? newValue : value)));
   };
-  const total = +values.reduce((p, v) => p + v, 0).toFixed(3);
-  const overTime = +(total - 40).toFixed(3);
-  const standard = overTime > 0 ? 40 : total;
+
+  const [total, standard, overTime, days] = buildDays(values);
+  // const overTime = +(total - 40).toFixed(3);
+  // const standard = overTime > 0 ? 40 : total;
   return (
     <>
+      Total Hours {total}
       <table>
         <thead>
           <tr>
@@ -116,12 +146,22 @@ const Table = () => {
             ))}
           </tr>
           <tr>
-            {values.map((value, i) => (
-              <td key={i}>{value}</td>
+            {days.map(([standard, overtime], i) => (
+              <td key={i}>
+                {!standard && !overtime ? (
+                  ""
+                ) : (
+                  <>
+                    <div>{`S: ${+standard.toFixed(3)}`}</div>
+                    {overtime ?<div>{`${`O: ${+overtime.toFixed(3)}`}`}</div>:
+                    null}
+                  </>
+                )}
+              </td>
             ))}
             <th>
-              Standard: {standard.toFixed(3)}{" "}
-              {overTime > 0 ? `| Overtime: ${overTime.toFixed(3)}` : ""}
+              Standard: {+standard.toFixed(3)}{" "}
+              {overTime > 0 ? `| Overtime: ${+overTime.toFixed(3)}` : ""}
             </th>
           </tr>
         </tbody>
