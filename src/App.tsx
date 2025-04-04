@@ -118,10 +118,13 @@ const Table = ({date}: {date: string}) => {
   const numberOfWeeks = 1;
   const weeks = Array(numberOfWeeks).fill(2);
   const dates = Array(7).fill(1).map((_, i) => {
-    const localDate = date ? new Date(date) : new Date();
-    const weekDay = localDate.setDate(localDate.getDate() + i);
-    const newDate = new Date(weekDay);
-    return getLocalDate(newDate.toISOString().replace(/T.*$/, ""));
+    const localDate = date ? new Date(date) : (() => {
+      const date = new Date()
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    })();
+    localDate.setDate(localDate.getDate() + i);
+
+    return getLocalDate(localDate.toISOString().replace(/T.*$/, ""));
   })
   const [values, setValues] = useState(
     weeks.flatMap(() => [0, 0, 0, 0, 0, 0, 0])
@@ -134,7 +137,6 @@ const Table = ({date}: {date: string}) => {
   // const overTime = +(total - 40).toFixed(3);
   // const standard = overTime > 0 ? 40 : total;
 
-
   return (
     <>
       Total Hours {total}
@@ -144,8 +146,7 @@ const Table = ({date}: {date: string}) => {
             {/* @ts-expect-error */}
             {weeks.map((v, i) => (
               <Fragment key={i}>
-                {dates.map((date) => (<th key={date}>{date}</th>))}
-                
+                {dates.map((date, i) => (<th key={date+ i}>{date}</th>))}
                 <th>Total</th>
               </Fragment>
             ))}
