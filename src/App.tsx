@@ -3,17 +3,21 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 
-const turnHoursAndMinutesIntoHoursFloat = (value: string) => {
-  const [hoursString, minutesString] = value.split(":");
-  let hours = 0,
-    minutes = 0;
-  if (minutesString) {
-    minutes = Number(minutesString);
+const turnHoursAndMinutesIntoHoursFloat = (timeString: string) => {
+  let result = 0;
+  for (const value of timeString.split("+")) {
+    const [hoursString, minutesString] = value.split(":");
+    let hours = 0,
+      minutes = 0;
+    if (minutesString) {
+      minutes = Number(minutesString);
+    }
+    if (hoursString) {
+      hours = Number(hoursString);
+    }
+    result = result + (hours + minutes / 60);
   }
-  if (hoursString) {
-    hours = Number(hoursString);
-  }
-  return +(hours + minutes / 60).toFixed(4);
+  return Number(result.toFixed(4));
 };
 
 const Tr = ({
@@ -104,9 +108,21 @@ const buildDays = (
   return [total, standard, overtime, days];
 };
 
-const Table = () => {
+const getLocalDate = (date: string) => {
+  const tempDate = new Date(date);
+  const localDate = new Date(tempDate.getUTCFullYear(), tempDate.getUTCMonth(), tempDate.getUTCDate());
+  return localDate.toLocaleDateString("en-US")
+}
+
+const Table = ({date}: {date: string}) => {
   const numberOfWeeks = 1;
   const weeks = Array(numberOfWeeks).fill(2);
+  const dates = Array(7).fill(1).map((_, i) => {
+    const localDate = date ? new Date(date) : new Date();
+    const weekDay = localDate.setDate(localDate.getDate() + i);
+    const newDate = new Date(weekDay);
+    return getLocalDate(newDate.toISOString().replace(/T.*$/, ""));
+  })
   const [values, setValues] = useState(
     weeks.flatMap(() => [0, 0, 0, 0, 0, 0, 0])
   );
@@ -117,6 +133,8 @@ const Table = () => {
   const [total, standard, overTime, days] = buildDays(values);
   // const overTime = +(total - 40).toFixed(3);
   // const standard = overTime > 0 ? 40 : total;
+
+
   return (
     <>
       Total Hours {total}
@@ -126,13 +144,8 @@ const Table = () => {
             {/* @ts-expect-error */}
             {weeks.map((v, i) => (
               <Fragment key={i}>
-                <th>Sunday</th>
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-                <th>Saturday</th>
+                {dates.map((date) => (<th key={date}>{date}</th>))}
+                
                 <th>Total</th>
               </Fragment>
             ))}
@@ -153,8 +166,9 @@ const Table = () => {
                 ) : (
                   <>
                     <div>{`S: ${+standard.toFixed(3)}`}</div>
-                    {overtime ?<div>{`${`O: ${+overtime.toFixed(3)}`}`}</div>:
-                    null}
+                    {overtime ? (
+                      <div>{`${`O: ${+overtime.toFixed(3)}`}`}</div>
+                    ) : null}
                   </>
                 )}
               </td>
@@ -171,6 +185,7 @@ const Table = () => {
 };
 
 function App() {
+  const [date, setDate] = useState('');
   return (
     <>
       <div>
@@ -182,7 +197,10 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
-      <Table />
+      <input type="date" onChange={(e) => {
+        setDate(e.target.value);
+      }} />
+      <Table date={date}/>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
