@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "npm run build && wrangler pages deploy",
     "deploy": "npm run build && wrangler pages deploy --branch=production"
   },
   "dependencies": {
